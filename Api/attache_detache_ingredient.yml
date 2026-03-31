@@ -1,0 +1,15 @@
+info:
+  name: attachement ou detachement ingredients
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{url}}/1/ingredients"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
