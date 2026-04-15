@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+    title: ingredient
+    version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  /ingredients:
+    get:
+      responses:
+        200:
+          description: Sauvgarder l'ingredient dans la base de donne
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ingredient'
+  /ingredients/{id}: 
+    get:
+      parameters:
+        - name : id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: retourner id ingredient 
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Ingredient'
+        404:
+          description: not found s'il n'y a pas d'ingeredient dans l'id qu'on tape
+          content:
+            text/plain:
+              example : 
+                'The ingredient with the id={id} is not found!'
+  /ingredients/{id}/stock:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name : at
+          in: query
+          schema:
+            type: string
+            format: date 
+        - name: unit 
+          in: query 
+          schema:
+            $ref: '#/components/schemas/StockValueUnitEnum'
+      responses:
+        200:
+          description: retourner le stock value a l'instant donner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockValue'
+        400:
+          description: quand il n'y a pas de parametre
+          content:
+            text/plain:
+              example:
+                'Either mandatory query parameter `at` or `unit` is not provided.'
+        404:
+          description: quand il n'y a pas d'ingredient pour l'id donner
+          content:
+            text/plain:
+              example : 
+                'The ingredient with the id={id} is not found!'
+  /dishes:
+    get:
+      responses:
+        200:
+          description: Sauvgarder le dish dans bd
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Dish'
+  /dishes/{id}/ingredients:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Ingredient'
+      responses:
+        200:
+          description: Retourner les mise a jour de plat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dish'
+        400:
+          description: Pas de parametre
+          content:
+            text/plain:
+              example:
+                'The required request body is not provided.'
+        404:
+          description: not found 
+          content:
+            text/plain:
+              example : 
+                'The dish with the id={id} is not found!'
+components:
+  schemas:
+    Ingredient:
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        stockMovementList:
+          type: array
+          items:
+            $ref: '#/components/schemas/StockMovement'
+    Dish:
+      properties:
+        id: 
+          type: integer
+        name:
+          type: string
+        price:
+          type: number
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
+    StockMovement:
+      properties:
+        id:
+          type: integer
+        value:
+          $ref: '#/components/schemas/StockValue'
+        type:
+          $ref: '#/components/schemas/StockMovementTypeEnum'
+        creationDatetime:
+          type: string
+          format: date
+          example:
+            '2030-06-14T9:00:00Z'
+    StockMovementTypeEnum:
+      type: string
+      enum:
+        - IN
+        - OUT
+    StockValue:
+      properties:
+        quantity:
+          type: number
+        unit:
+          $ref: '#/components/schemas/StockValueUnitEnum'
+    StockValueUnitEnum:
+      type: string
+      enum:
+        - PC 
+        - KG 
+        - L
